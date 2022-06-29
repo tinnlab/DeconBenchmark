@@ -1,0 +1,14 @@
+Package: DeconBenchmark
+Type: Package
+Title: Deconvolution Benchmarking
+Version: 1.0
+Date: 2022-06-26
+Author: Phi Hung Nguyen
+Depends: R (>= 4.0.0)
+biocViews:
+Imports: rhdf5, processx, limma, edgeR
+Suggests: babelwhale
+Maintainer: Phi Hung Nguyen <hungnp@nevada.unr.edu>
+Description: This package provides a common interface to run >45 deconvolution methods.
+git_url: https://github.com/tinnlab/DeconBenchmark
+License: GPL-3
