@@ -88,6 +88,7 @@ List of supported methods, their required inputs beside bulk data and their orig
 | SCDC              | single cell expression, single cell labels                             | https://doi.org/10.1093/bib/bbz166             | https://github.com/meichendong/SCDC                  |
 | TOAST             | number of cell types, markers                                          | https://doi.org/10.1186/s13059-019-1778-0      | https://bioconductor.org/packages/TOAST              |
 
+The dockerfile for each method is located in the [DeconBenchmark-docker](https://github.com/tinnlab/DeconBenchmark-docker) repository.
 Please cite the original publications if you use the methods in your work.
 
 ## Examples
