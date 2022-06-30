@@ -233,7 +233,7 @@ runDeconvolution <- function(methods,
     allResults[[method]] <- list(P = P, S = S)
   }
 
-  # unlink(tmpDir, recursive = TRUE)
+  unlink(tmpDir, recursive = TRUE)
 
   allResults
 }
