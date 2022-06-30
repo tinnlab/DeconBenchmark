@@ -1,14 +1,11 @@
-library(rhdf5)
-
-#’ Get supported deconvolution methods
-#’
-#’ Get supported deconvolution methods
-#’
-#’ @return a array of supported methods.
-#’
+#' @title Get supported deconvolution methods
+#'
+#' @description Get supported deconvolution methods
+#'
+#' @return an array of supported methods.
 #' @examples
 #' supportedMethods <- getSupportedMethods()
-#’ @export
+#' @export
 getSupportedMethods <- function(){
   c("AdRoit", "ARIC", "AutoGeneS", "BayCount", "BayesCCE", "BayICE", "BisqueMarker", "CellDistinguisher",
     "CIBERSORT", "CPM", "DAISM", "debCAM", "Deblender", "DeCompress", "deconf", "DeconICA", "DeconPeaker",
@@ -17,33 +14,33 @@ getSupportedMethods <- function(){
     "NITUMID", "PREDE", "quanTIseq", "ReFACTor", "RNA-Sieve", "scaden", "SCDC", "TOAST")
 }
 
-#’ Get docker image name
-#’
-#’ Get docker image name. This method is not to be called by users.
-#’
-#’ @param method Method name
-#’
-#’ @return docker image name for the method
+#' @title Get docker image name
+#'
+#' @description Get docker image name. This method is not to be called by users.
+#'
+#' @param method Method name
+#'
+#' @return docker image name for the method
 .getMethodDockerRepos <- function(method){
   paste0("deconvolution/", tolower(method), ":latest")
 }
 
-#’ Get required inputs for a list of methods
-#’
-#’ Get required inputs for a list of methods
-#’
-#’ @param methods An array of method names
-#’
-#’ @return a list with names/keys are methods and values of each key are required parameters of the coressponding method.
-#’
+#' @title Get required inputs for a list of methods
+#'
+#' @description Get required inputs for a list of methods
+#'
+#' @param methods An array of method names
+#'
+#' @return a list with names/keys are methods and values of each key are required parameters of the coressponding method.
+#'
 #' @examples
 #' \dontrun{
 #' requiredInputs <- getRequiredInputs(c("AdRoit", "ARIC"))
 #' print(requiredInputs$AdRoit)
 #' print(requiredInputs$ARIC)
 #' }
-#’ @importFrom processx run
-#’ @export
+#' @importFrom processx run
+#' @export
 getMethodsInputs <- function(methods, verbose = T) {
   methodParams <- list()
 
@@ -86,11 +83,10 @@ getMethodsInputs <- function(methods, verbose = T) {
   methodParams
 }
 
-#’ Write arguments to a h5 file
-#’
-#’ Write deconvolution arguments to a h5 file. This method is not to be called by users.
-#’
-#’
+#' @title Write arguments to a h5 file
+#'
+#' @description Write deconvolution arguments to a h5 file. This method is not to be called by users.
+#' @importFrom rhdf5 h5createGroup h5write h5createFile
 .writeArgs <- function(h5file,
                        bulk,
                        nCellTypes = NULL,
@@ -106,26 +102,26 @@ getMethodsInputs <- function(methods, verbose = T) {
 ) {
 
   writeListOrVector <- function(v, name) {
-    h5createGroup(h5file, name)
-    h5write(v, h5file, paste0(name, "/values"))
+    rhdf5::h5createGroup(h5file, name)
+    rhdf5::h5write(v, h5file, paste0(name, "/values"))
     if (!is.null(names(v))) {
-      h5write(names(v), h5file, paste0(name, "/names"))
+      rhdf5::h5write(names(v), h5file, paste0(name, "/names"))
     }
   }
 
   writeMatrix <- function(m, name) {
-    h5createGroup(h5file, name)
-    h5write(m, h5file, paste0(name, "/values"))
+    rhdf5::h5createGroup(h5file, name)
+    rhdf5::h5write(m, h5file, paste0(name, "/values"))
     if (!is.null(rownames(m))) {
-      h5write(rownames(m), h5file, paste0(name, "/rownames"))
+      rhdf5::h5write(rownames(m), h5file, paste0(name, "/rownames"))
     }
     if (!is.null(colnames(m))) {
-      h5write(colnames(m), h5file, paste0(name, "/colnames"))
+      rhdf5::h5write(colnames(m), h5file, paste0(name, "/colnames"))
     }
   }
 
   unlink(h5file)
-  h5createFile(h5file)
+  rhdf5::h5createFile(h5file)
 
   if (!is.null(seed))               writeListOrVector(seed, "seed")
   if (!is.null(bulk))               writeMatrix(bulk, "bulk")

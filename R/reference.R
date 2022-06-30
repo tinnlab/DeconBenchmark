@@ -1,7 +1,7 @@
-#’ Calculate markers from single cell data
-#’
-#’ Calculate markers from single cell data. This method is not to be called by users.
-#’
+#' @title Calculate markers from single cell data
+#'
+#' @description Calculate markers from single cell data. This method is not to be called by users.
+#'
 #' @importFrom edgeR DGEList calcNormFactors
 #' @importFrom limma voom lmFit contrasts.fit eBayes topTable
 .generateReference.markers <- function(singleCellExpr, singleCellLabels, log2Threshold = 1) {
@@ -72,32 +72,32 @@
   markers
 }
 
-#’ Generate reference data
-#’
-#’ Generate reference data from single-cell expression with cell type label for each cell.
-#’
-#’ @param singleCellExpr Single-cell expression matrix in non-log scale. Rows are genes and columns are cells.
-#’ @param singleCellLabels An array contains cell type label for each cell. The order of labels must be the same as the order of cells in in singleCellExpr.
-#’ @param types An array of different type of reference to generate.
-#’ @param log2Threshold The threshold for log2FC for filtering markers.
-#’
-#’ @return A list with names/keys are the same as in types.
-#’ If type is `markers`, the value is a list with names/keys are unique cell types and values for each key are an array of markers for the corresponding cell type.
-#’ If type is `sigGenes`, the value is the unique concatenation of all `markers`.
-#’ If type is `signature`, the value is an matrix of `sigGenes` x `cellTypes`.
-#’ If type is `cellTypeExpr`,  the value is an matrix of `all genes` x `cellTypes`.
-#’
-#’ @examples
-#’ library(DeconUtils)
-#’ data(BloodExample) # Load bulk data
-#’ print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
-#’ reference <- generateReference(BloodExample$singleCellExpr, BloodExample$singleCellLabels, c("markers", "sigGenes", "signature", "cellTypeExpr"))
-#’ print(reference$markers)
-#’ print(reference$sigGenes)
-#’ print(head(reference$signature))
-#’ print(head(reference$cellTypeExpr))
-#’
-#’ @export
+#' @title Generate reference data
+#'
+#' @description Generate reference data from single-cell expression with cell type label for each cell.
+#'
+#' @param singleCellExpr Single-cell expression matrix in non-log scale. Rows are genes and columns are cells.
+#' @param singleCellLabels An array contains cell type label for each cell. The order of labels must be the same as the order of cells in in singleCellExpr.
+#' @param types An array of different type of reference to generate.
+#' @param log2Threshold The threshold for log2FC for filtering markers.
+#'
+#' @return A list with names/keys are the same as in types.
+#' If type is `markers`, the value is a list with names/keys are unique cell types and values for each key are an array of markers for the corresponding cell type.
+#' If type is `sigGenes`, the value is the unique concatenation of all `markers`.
+#' If type is `signature`, the value is an matrix of `sigGenes` x `cellTypes`.
+#' If type is `cellTypeExpr`,  the value is an matrix of `all genes` x `cellTypes`.
+#'
+#' @examples
+#' library(DeconBenchmark)
+#' data(BloodExample) # Load bulk data
+#' print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
+#' reference <- generateReference(BloodExample$singleCellExpr, BloodExample$singleCellLabels, c("markers", "sigGenes", "signature", "cellTypeExpr"))
+#' print(reference$markers)
+#' print(reference$sigGenes)
+#' print(head(reference$signature))
+#' print(head(reference$cellTypeExpr))
+#'
+#' @export
 generateReference <- function(singleCellExpr, singleCellLabels, types = c("markers", "sigGenes", "signature", "cellTypeExpr"), log2Threshold = 1) {
   reference <- list()
 
@@ -115,7 +115,7 @@ generateReference <- function(singleCellExpr, singleCellLabels, types = c("marke
     rownames(cellTypeExpr) <- rownames(singleCellExpr)
 
     for (cellType in unique(singleCellLabels)) {
-      tmp <- rowSums(trainData[, trainLabel == cellType])
+      tmp <- rowSums(singleCellExpr[, singleCellLabels == cellType])
       tmp <- tmp / sum(tmp) * 1e6
       cellTypeExpr[, cellType] <- tmp
     }
@@ -124,8 +124,8 @@ generateReference <- function(singleCellExpr, singleCellLabels, types = c("marke
   }
 
   if ("signature" %in% types) {
-    reference$signature <- reference$cellTypeExpr[, reference$sigGenes]
+    reference$signature <- reference$cellTypeExpr[reference$sigGenes, ]
   }
 
-  reference[type]
+  reference[types]
 }

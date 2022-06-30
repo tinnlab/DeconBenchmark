@@ -12,3 +12,5 @@ Maintainer: Phi Hung Nguyen <hungnp@nevada.unr.edu>
 Description: This package provides a common interface to run >45 deconvolution methods.
 git_url: https://github.com/tinnlab/DeconBenchmark
 License: GPL-3
+Encoding: UTF-8
+RoxygenNote: 7.2.0

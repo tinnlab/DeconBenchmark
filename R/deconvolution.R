@@ -1,62 +1,76 @@
-#’ Run deconvolution
-#’
-#’ Run deconvolution for a list of methods.
-#’ See getSupportedMethods() for the list of supported methods.
-#  Each method is run in a separate docker container.
-#’ Each method has its own required inputs.
-#  See getMethodsInputs() for the input of each method.
-#’
-#’ @param methods An array of method names. See getSupportedMethods() for the list of supported methods.
-#’ @param bulk A matrix of bulk data. Rows are genes and columns are bulk samples.
-#’ @param nCellTypes The number of cell types.
-#’ @param markers A list with name/key are cell types and values of each key are markers for the coressponding cell type.
-#’ @param isMethylation A logical value (TRUE or FALSE) indicating whether the input data is methylation data.
-#’ @param singleCellExpr A matrix of single cell data. Rows are genes and columns are single cell samples.
-#’ @param singleCellLabels A array of single cell labels. The order of the labels must be the same as the order of the single cell samples.
-#’ @param singleCellSubjects A array of single cell subjects. The order of the subjects must be the same as the order of the single cell samples.
-#’ @param cellTypeExpr A matrix of cell type data. Rows are genes and columns are cell types. This matrix normally contains the same number of genes as bulk expression matrix (not to be confused with signature matrix).
-#’ @param sigGenes A list of significant genes.
-#’ @param signature A matrix of signature data. Rows are genes and columns are cell types. This matrix normally contains only marker genes (not to be confused with cell type expresison matrix).
-#’ @param seed An integer value for the seed of the random number generator.
-#’ @param matlabLicenseFile A path to a matlab license file. This file is required for methods that use matlab. The hostid of this license is the same as the hostid of the host machine. The user of this license must be `root`. Visit Matlab license center (https://www.mathworks.com/licensecenter/licenses) to obtain a license file.
-#’ @param timeout A timeout in seconds for the docker container. The default value is 12 hours.
-#’ @param dockerArgs A list of extra arguments for the docker container. The default values allow docker container to use maximum 8 cpus, reserve 4GB of memory and allow it to use up to 32GB of memory.
-#’ @param verbose A logical value (TRUE or FALSE) indicating whether to print the output of running processes.
-#’
-#’ @return A list with names/keys are methods and values of each key is the deconvolution result for the corresponding methods. The deconvolution result for each method is a list with two elements: `$P` and `$S`. The `$P` is a matrix cell type proportions (samples x cell type) and the `$S` is a matrix of cell type signatures (genes x cell type).
-#’
-#’ @examples
-#’ \dontrun{
-#’ library(DeconUtils)
-#’ allSupportMethods <- getSupportedMethods() # Get the list of supported methods
-#’ print(allSupportMethods)
-#’ methodsToRun <- c("AdRoit", "ARIC") # Select methods to run (must be in the list of supported methods)
-#’ requiredInputs <- getMethodsInputs(supportMethods) # Get the required inputs for each method
-#’ print(requiredInputs) # list (AdRoif = c("bulk", "singleCellExpr", "singleCellLabels"), ARIC = c("bulk", "cellTypeExpr", "isMethylation"))
-#’ data(BloodExample) # Load example data
-#’ print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
-#’ bulk <- BloodExample$bulk
-#’ singleCellExpr <- BloodExample$singleCellExpr
-#’ singleCellLabels <- BloodExample$singleCellLabels
-#’ # Run AdRoit only
-#’ deconvolutionResult <- deconvolution(methods = "AdRoit", bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels)
-#’ proportion <- deconvolutionResult$AdRoit$P
-#’ print(proportion)
-#’ # Run ARIC only
-#’ reference <- generateReference(singleCellExpr, singleCellLabels, type="cellTypeExpr") # Generate reference
-#’ deconvolutionResult <- deconvolution(methods = "ARIC", bulk = bulk,  cellTypeExpr = reference$cellTypeExpr, isMethylation = F)
-#’ proportion <- deconvolutionResult$ARIC$P
-#’ print(proportion)
-#’ # Run both AdRoit and ARIC
-#’ reference <- generateReference(singleCellExpr, singleCellLabels, type="cellTypeExpr") # Generate reference
-#’ deconvolutionResults <- deconvolution(methodsToRun, bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels, cellTypeExpr = reference$cellTypeExpr, isMethylation = F) # Run deconvolution
-#’ proportionAdRoit <- deconvolutionResults$AdRoit$P
-#’ proportionARIC <- deconvolutionResults$AdRoit$P
-#’ print(proportionAdRoit)
-#’ print(proportionARIC)
-#’ }
-#’ @import processx
-#’ @export
+#' @title Run deconvolution
+#'
+#' @description
+#' Run deconvolution for a list of methods.
+#' See getSupportedMethods() for the list of supported methods.
+#' Each method is run in a separate docker container.
+#' Each method has its own required inputs.
+#' See getMethodsInputs() for the input of each method.
+#'
+#' @param methods An array of method names. See getSupportedMethods() for the list of supported methods.
+#' @param bulk A matrix of bulk data. Rows are genes and columns are bulk samples.
+#' @param nCellTypes The number of cell types.
+#' @param markers A list with name/key are cell types and values of each key are markers for the coressponding cell type.
+#' @param isMethylation A logical value (TRUE or FALSE) indicating whether the input data is methylation data.
+#' @param singleCellExpr A matrix of single cell data. Rows are genes and columns are single cell samples.
+#' @param singleCellLabels A array of single cell labels. The order of the labels must be the same as the order of the single cell samples.
+#' @param singleCellSubjects A array of single cell subjects. The order of the subjects must be the same as the order of the single cell samples.
+#' @param cellTypeExpr A matrix of cell type data. Rows are genes and columns are cell types. This matrix normally contains the same number of genes as bulk expression matrix (not to be confused with signature matrix).
+#' @param sigGenes A list of significant genes.
+#' @param signature A matrix of signature data. Rows are genes and columns are cell types. This matrix normally contains only marker genes (not to be confused with cell type expresison matrix).
+#' @param seed An integer value for the seed of the random number generator.
+#' @param matlabLicenseFile A path to a matlab license file. This file is required for methods that use matlab. The hostid of this license is the same as the hostid of the host machine. The user of this license must be `root`. Visit Matlab license center (https://www.mathworks.com/licensecenter/licenses) to obtain a license file.
+#' @param timeout A timeout in seconds for the docker container. The default value is 12 hours.
+#' @param dockerArgs A list of extra arguments for the docker container. The default values allow docker container to use maximum 8 cpus, reserve 4GB of memory and allow it to use up to 32GB of memory.
+#' @param verbose A logical value (TRUE or FALSE) indicating whether to print the output of running processes.
+#'
+#' @return A list with names/keys are methods and values of each key is the deconvolution result for the corresponding methods. The deconvolution result for each method is a list with two elements: `$P` and `$S`. The `$P` is a matrix cell type proportions (samples x cell type) and the `$S` is a matrix of cell type signatures (genes x cell type).
+#'
+#' @examples
+#' \dontrun{
+#' library(DeconBenchmark)
+#'
+#' allSupportMethods <- getSupportedMethods() # Get the list of supported methods
+#' print(allSupportMethods)
+#' methodsToRun <- c("ReFACTor", "scaden", "CIBERSORT") # Select methods to run (must be in the list of supported methods)
+#' requiredInputs <- getMethodsInputs(methodsToRun) # Get the required inputs for each method
+#' print(requiredInputs) # list(ReFACTor = c("bulk", "nCellTypes"), scaden = c("bulk", "singleCellExpr", "singleCellLabels"), CIBERSORT = c("bulk", "signature"))
+#'
+#' data(BloodExample) # Load example data
+#' print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
+#' bulk <- BloodExample$bulk
+#'
+#' # Run AdRoit only
+#' deconvolutionResult <- runDeconvolution(methods = "ReFACTor", bulk = bulk, nCellTypes = 8)
+#' proportion <- deconvolutionResult$ReFACTor$P
+#' print(head(proportion))
+#'
+#' # Run ARIC only
+#' singleCellExpr <- BloodExample$singleCellExpr
+#' singleCellLabels <- BloodExample$singleCellLabels
+#'
+#' deconvolutionResult <- runDeconvolution(methods = "scaden", bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels)
+#' proportion <- deconvolutionResult$scaden$P
+#' print(head(proportion))
+#'
+#' # Run CIBERSORT only
+#' reference <- generateReference(singleCellExpr, singleCellLabels, type="signature") # Generate reference
+#'
+#' deconvolutionResult <- runDeconvolution(methods = "CIBERSORT", bulk = bulk, signature=reference$signature)
+#' proportion <- deconvolutionResult$CIBERSORT$P
+#' print(head(proportion))
+#'
+#' # Run all three methods
+#' deconvolutionResults <- runDeconvolution(methodsToRun, bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels, signature=reference$signature)
+#' proportions <- lapply(deconvolutionResults, function(res) res$P)
+#'
+#' print(head(proportions$ReFACTor))
+#' print(head(proportions$CIBERSORT))
+#' print(head(proportions$scaden))
+#' }
+#' @importFrom processx run
+#' @importFrom rhdf5 h5read
+#' @export
 runDeconvolution <- function(methods,
                              bulk,
                              nCellTypes = NULL,
@@ -138,21 +152,24 @@ runDeconvolution <- function(methods,
     }
 
     resFile <- file.path(tmpDir, paste0(method, "-results.h5"))
+    print(resFile)
     if (length(resFile) == 0) {
       allResults[[method]] <- NULL
       next()
     }
 
     P <- tryCatch(
-      h5read(resFile, "P"),
+      rhdf5::h5read(resFile, "P"),
       error = function(e) {
+        # message(e)
         NULL
       }
     )
 
     S <- tryCatch(
-      h5read(resFile, "S"),
+      rhdf5::h5read(resFile, "S"),
       error = function(e) {
+        # message(e)
         NULL
       }
     )
