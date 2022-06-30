@@ -40,12 +40,12 @@
 #' print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
 #' bulk <- BloodExample$bulk
 #'
-#' # Run AdRoit only
+#' # Run ReFACTor only
 #' deconvolutionResult <- runDeconvolution(methods = "ReFACTor", bulk = bulk, nCellTypes = 8)
 #' proportion <- deconvolutionResult$ReFACTor$P
 #' print(head(proportion))
 #'
-#' # Run ARIC only
+#' # Run scaden only
 #' singleCellExpr <- BloodExample$singleCellExpr
 #' singleCellLabels <- BloodExample$singleCellLabels
 #'

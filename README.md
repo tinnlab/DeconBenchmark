@@ -83,54 +83,54 @@ List of supported methods, their required inputs beside bulk data and their orig
 Please cite the original publications if you use the methods in your work.
 
 ## Examples
+Get the list of all available methods.
 
 ```R
-# load example data
-data(BloodExample)
+allSupportMethods <- getSupportedMethods() # Get the list of supported methods
+print(allSupportMethods)
+```
+
+Select methods to run and get their required inputs.
+```R
+methodsToRun <- c("ReFACTor", "scaden", "CIBERSORT") # Select methods to run (must be in the list of supported methods)
+requiredInputs <- getMethodsInputs(methodsToRun) # Get the required inputs for each method
+print(requiredInputs) # list(ReFACTor = c("bulk", "nCellTypes"), scaden = c("bulk", "singleCellExpr", "singleCellLabels"), CIBERSORT = c("bulk", "signature"))
+```
+Load example data
+```R
+data(BloodExample) # Load example data
 print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
 bulk <- BloodExample$bulk
+```
+Run each method sepratedly.
+```R
+# Run ReFACTor only
+deconvolutionResult <- runDeconvolution(methods = "ReFACTor", bulk = bulk, nCellTypes = 8)
+proportion <- deconvolutionResult$ReFACTor$P
+print(head(proportion))
+
+# Run scaden only
 singleCellExpr <- BloodExample$singleCellExpr
 singleCellLabels <- BloodExample$singleCellLabels
-```
 
-### Run an individual method
-First, check the required inputs for the method.
-```R
-methodsToRun <- "AdRoit"
+deconvolutionResult <- runDeconvolution(methods = "scaden", bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels)
+proportion <- deconvolutionResult$scaden$P
+print(head(proportion))
 
-# get required inputs
-inputTypes <- getMethodsInputs(methodsToRun)
-print(inputTypes) # list (AdRoif = c("bulk", "singleCellExpr", "singleCellLabels"))
-```
-We already had all inputs needed for the method to run the deconvolution.
-```R
-deconvolutionResult <- deconvolution(methods = methodsToRun, bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels)
-proportion <- deconvolutionResult$AdRoit$P
+# Run CIBERSORT only
+reference <- generateReference(singleCellExpr, singleCellLabels, type="signature") # Generate reference
+
+deconvolutionResult <- runDeconvolution(methods = "CIBERSORT", bulk = bulk, signature=reference$signature)
+proportion <- deconvolutionResult$CIBERSORT$P
 print(head(proportion))
 ```
-
-
-### Run multiple methods
+Run all three methods
 ```R
-methodsToRun <- c("AdRoit", "ARIC")
+deconvolutionResults <- runDeconvolution(methodsToRun, bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels, signature=reference$signature)
+proportions <- lapply(deconvolutionResults, function(res) res$P)
 
-# get required inputs
-inputTypes <- getMethodsInputs(methodsToRun)
-print(inputTypes) # list (AdRoif = c("bulk", "singleCellExpr", "singleCellLabels"), ARIC = c("bulk", "cellTypeExpr", "isMethylation"))
-```
-The `ARIC` method requires the extra inputs `cellTypeExpr` and `isMethylation`.
-Since our data is RNA data, so `isMethylation` is `FALSE`.
-Now we generate the cell type expression `cellTypeExpr`
-
-```R
-reference <- generateReference(singleCellExpr, singleCellLabels, type="cellTypeExpr")
-```
-Run the deconvolution using two methods.
-```R
-deconvolutionResults <- deconvolution(methodsToRun, bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels, cellTypeExpr = reference$cellTypeExpr, isMethylation = F) # Run deconvolution
-proportionAdRoit <- deconvolutionResults$AdRoit$P
-proportionARIC <- deconvolutionResults$AdRoit$P
-print(proportionAdRoit)
-print(proportionARIC)
+print(head(proportions$ReFACTor))
+print(head(proportions$CIBERSORT))
+print(head(proportions$scaden))
 ```
 
