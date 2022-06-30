@@ -21,6 +21,7 @@
 #' @param seed An integer value for the seed of the random number generator.
 #' @param matlabLicenseFile A path to a matlab license file. This file is required for methods that use matlab. The hostid of this license is the same as the hostid of the host machine. The user of this license must be `root`. Visit Matlab license center (https://www.mathworks.com/licensecenter/licenses) to obtain a license file.
 #' @param timeout A timeout in seconds for the docker container. The default value is 12 hours.
+#' @param containerEngine A string indicating the container engine, must be `docker` or `singularity`. The default value is `docker`.
 #' @param dockerArgs A list of extra arguments for the docker container. The default values allow docker container to use maximum 8 cpus, reserve 4GB of memory and allow it to use up to 32GB of memory.
 #' @param verbose A logical value (TRUE or FALSE) indicating whether to print the output of running processes.
 #'
@@ -85,6 +86,7 @@ runDeconvolution <- function(methods,
                              seed = 1,
                              matlabLicenseFile = NULL,
                              timeout = 60*60*12,
+                             containerEngine = "docker",
                              dockerArgs = c(
                                '--cpus=8.0',
                                '-m=32G',
@@ -116,35 +118,68 @@ runDeconvolution <- function(methods,
   allResults <- list()
 
   for (method in methods) {
+    if (containerEngine == "docker"){
+      params <- c("run", "--rm", dockerArgs,
+                  "-v", paste0(tmpH5File, ":", "/input/args.h5"),
+                  "-v", paste0(tmpDir, ":", "/output"),
+                  '-e', 'INPUT_PATH=/input/args.h5',
+                  '-e', paste0('OUTPUT_PATH=/output/', method,'-results.h5')
+      )
 
-    params <- c("run", "--rm", dockerArgs,
-                "-v", paste0(tmpH5File, ":", "/args.h5"),
-                "-v", paste0(tmpDir, ":", "/output"),
-                '-e', paste0('OUTPUT_PATH=/output/', method,'-results.h5')
-    )
-
-    if (!is.null(matlabLicenseFile)) {
-      params <- c(params, "-v", paste0(matlabLicenseFile, ':', '/licenses/license.lic'), '--network=host')
-    }
-    params <- c(params, .getMethodDockerRepos(method))
-
-    .message("Running docker ", paste(params, collapse = " "))
-
-    res <- tryCatch(
-      processx::run("docker",
-                    params,
-                    timeout = timeout,
-                    error_on_status = FALSE,
-                    stdout_callback = function(newout, proc) {
-                      .message(newout)
-                    },
-                    stderr_callback = function(newerr, proc) {
-                      message(newerr)
-                    }),
-      error = function(e) {
-        list(status = T)
+      if (!is.null(matlabLicenseFile)) {
+        params <- c(params, "-v", paste0(matlabLicenseFile, ':', '/licenses/license.lic'), '--network=host')
       }
-    )
+      params <- c(params, .getMethodDockerRepos(method))
+
+      .message("Running docker ", paste(params, collapse = " "))
+
+      res <- tryCatch(
+        processx::run("docker",
+                      params,
+                      timeout = timeout,
+                      error_on_status = FALSE,
+                      stdout_callback = function(newout, proc) {
+                        .message(newout)
+                      },
+                      stderr_callback = function(newerr, proc) {
+                        message(newerr)
+                      }),
+        error = function(e) {
+          list(status = T)
+        }
+      )
+    } else if (containerEngine == "singularity"){
+      params <- c("run",
+                  '--env', paste0('INPUT_PATH=', tmpH5File),
+                  '--env', paste0('OUTPUT_PATH=', file.path(tmpDir, paste0(method, "-results.h5")))
+      )
+
+      if (!is.null(matlabLicenseFile)) {
+        params <- c(params, "--env", paste0("MLM_LICENSE_FILE=", matlabLicenseFile))
+      }
+      params <- c(params, paste0("docker://", .getMethodDockerRepos(method)))
+
+      .message("Running singularity ", paste(params, collapse = " "))
+
+      res <- tryCatch(
+        processx::run("singularity",
+                      params,
+                      timeout = timeout,
+                      error_on_status = FALSE,
+                      stdout_callback = function(newout, proc) {
+                        .message(newout)
+                      },
+                      stderr_callback = function(newerr, proc) {
+                        message(newerr)
+                      }),
+        error = function(e) {
+          message(e)
+          list(status = T)
+        }
+      )
+    } else {
+      stop("Unsupported container engine", containerEngine)
+    }
 
     if (res$status) {
       allResults[[method]] <- NULL
@@ -152,7 +187,6 @@ runDeconvolution <- function(methods,
     }
 
     resFile <- file.path(tmpDir, paste0(method, "-results.h5"))
-    print(resFile)
     if (length(resFile) == 0) {
       allResults[[method]] <- NULL
       next()
@@ -199,7 +233,7 @@ runDeconvolution <- function(methods,
     allResults[[method]] <- list(P = P, S = S)
   }
 
-  unlink(tmpDir, recursive = TRUE)
+  # unlink(tmpDir, recursive = TRUE)
 
   allResults
 }

@@ -4,10 +4,14 @@
 \alias{getMethodsInputs}
 \title{Get required inputs for a list of methods}
 \usage{
-getMethodsInputs(methods, verbose = T)
+getMethodsInputs(methods, containerEngine = "docker", verbose = T)
 }
 \arguments{
 \item{methods}{An array of method names}
+
+\item{containerEngine}{A string indicating the container engine, must be `docker` or `singularity`. The default value is `docker`.}
+
+\item{verbose}{A logical value (TRUE or FALSE) indicating whether to print the output of running processes.}
 }
 \value{
 a list with names/keys are methods and values of each key are required parameters of the coressponding method.

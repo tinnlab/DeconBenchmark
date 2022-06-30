@@ -30,6 +30,8 @@ getSupportedMethods <- function(){
 #' @description Get required inputs for a list of methods
 #'
 #' @param methods An array of method names
+#' @param containerEngine A string indicating the container engine, must be `docker` or `singularity`. The default value is `docker`.
+#' @param verbose A logical value (TRUE or FALSE) indicating whether to print the output of running processes.
 #'
 #' @return a list with names/keys are methods and values of each key are required parameters of the coressponding method.
 #'
@@ -41,34 +43,61 @@ getSupportedMethods <- function(){
 #' }
 #' @importFrom processx run
 #' @export
-getMethodsInputs <- function(methods, verbose = T) {
+getMethodsInputs <- function(methods, containerEngine = "docker", verbose = T) {
   methodParams <- list()
 
   for (method in methods) {
     tmpDir <- file.path(tempdir(), paste0(sample(c(LETTERS, letters), 10, TRUE), collapse = ""))
+    dir.create(tmpDir, recursive = TRUE, showWarnings = F)
 
-    params <- c("run", "--rm",
-                "-v", paste0(tmpDir, ":", "/output"),
-                '-e', 'PARAMS_OUTPUT_PATH=/output/params.csv',
-                .getMethodDockerRepos(method)
-    )
+    if (containerEngine == "docker"){
+      params <- c("run", "--rm",
+                  "-v", paste0(tmpDir, ":", "/output"),
+                  '-e', 'PARAMS_OUTPUT_PATH=/output/params.csv',
+                  .getMethodDockerRepos(method)
+      )
 
-    if (verbose) message("Running docker ", paste(params, collapse = " "))
+      if (verbose) message("Running docker ", paste(params, collapse = " "))
 
-    tryCatch(
-      processx::run("docker",
-                    params,
-                    error_on_status = FALSE,
-                    stdout_callback = function(newout, proc) {
-                      if (verbose) message(newout)
-                    },
-                    stderr_callback = function(newerr, proc) {
-                      message(newerr)
-                    }),
-      error = function(e) {
-        list(status = T)
-      }
-    )
+      tryCatch(
+        processx::run("docker",
+                      params,
+                      error_on_status = FALSE,
+                      stdout_callback = function(newout, proc) {
+                        if (verbose) message(newout)
+                      },
+                      stderr_callback = function(newerr, proc) {
+                        message(newerr)
+                      }),
+        error = function(e) {
+          list(status = T)
+        }
+      )
+    } else if (containerEngine == "singularity"){
+      params <- c("run",
+                  '--env', paste0('PARAMS_OUTPUT_PATH=', tmpDir, '/params.csv'),
+                  paste0("docker://", .getMethodDockerRepos(method))
+      )
+
+      if (verbose) message("Running singularity ", paste(params, collapse = " "))
+
+      tryCatch(
+        processx::run("singularity",
+                      params,
+                      error_on_status = FALSE,
+                      stdout_callback = function(newout, proc) {
+                        if (verbose) message(newout)
+                      },
+                      stderr_callback = function(newerr, proc) {
+                        message(newerr)
+                      }),
+        error = function(e) {
+          list(status = T)
+        }
+      )
+    } else {
+      stop("Unknown container engine", containerEngine)
+    }
 
     resultFile <- file.path(tmpDir, "params.csv")
     if (file.exists(resultFile)) {
@@ -76,8 +105,8 @@ getMethodsInputs <- function(methods, verbose = T) {
       methodParams[[method]] <- methodParam
     } else {
       methodParams[[method]] <- NULL
-      continue()
     }
+    unlink(tmpDir, recursive = TRUE)
   }
 
   methodParams

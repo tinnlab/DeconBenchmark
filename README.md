@@ -4,19 +4,27 @@ This package provides a common interface to run 46 deconvolution methods.
 
 ## Installation
 
-This package requires `docker` to be installed and `R` version 4.0 or later.
+This package requires `R` version 4.0 or later.
+We run each deconvolution in a separate container.
+Therefore, a container engine (i.e., `docker` or `singularity`) needs to be installed.
 
-### Install docker
+### Install docker or singularity
 
 Follow instructions at [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/) to install `docker`.
-To check docker is installed and R can communicate with it, run:
+Note that docker needs root privileges to install or and to be added to the `docker` group to run.
+Users that do not have root privileges can use `singuarity` instead.
+To install `singularity`, follow instructions at [https://docs.sylabs.io/guides/3.3/user-guide/installation.html](https://docs.sylabs.io/guides/3.3/user-guide/installation.html).
+
+To check  if`docker` or `singularity` is installed and R can communicate with it, run:
 
 ```R
 if (!requireNamespace("babelwhale", quietly = TRUE)) {
    install.packages("babelwhale")
 }
+# For docker
 babelwhale::test_docker_installation(detailed = TRUE)
-
+# OR for singularity, make sure singularity binary is in PATH
+babelwhale::test_singularity_installation(detailed = TRUE)
 ```
 
 ### Install DeconBenchmark
@@ -93,7 +101,9 @@ print(allSupportMethods)
 Select methods to run and get their required inputs.
 ```R
 methodsToRun <- c("ReFACTor", "scaden", "CIBERSORT") # Select methods to run (must be in the list of supported methods)
-requiredInputs <- getMethodsInputs(methodsToRun) # Get the required inputs for each method
+# Get the required inputs for each method. 
+# ContainerEngine is "docker" by default. Change containerEngine to "singularity" if you want to use singularity instead
+requiredInputs <- getMethodsInputs(methodsToRun, containerEngine = "docker")
 print(requiredInputs) # list(ReFACTor = c("bulk", "nCellTypes"), scaden = c("bulk", "singleCellExpr", "singleCellLabels"), CIBERSORT = c("bulk", "signature"))
 ```
 Load example data
@@ -105,7 +115,7 @@ bulk <- BloodExample$bulk
 Run each method sepratedly.
 ```R
 # Run ReFACTor only
-deconvolutionResult <- runDeconvolution(methods = "ReFACTor", bulk = bulk, nCellTypes = 8)
+deconvolutionResult <- runDeconvolution(methods = "ReFACTor", bulk = bulk, nCellTypes = 8, containerEngine = "docker")
 proportion <- deconvolutionResult$ReFACTor$P
 print(head(proportion))
 
