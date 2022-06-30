@@ -112,7 +112,7 @@ data(BloodExample) # Load example data
 print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
 bulk <- BloodExample$bulk
 ```
-Run each method sepratedly.
+Run each method separately.
 ```R
 # Run ReFACTor only
 deconvolutionResult <- runDeconvolution(methods = "ReFACTor", bulk = bulk, nCellTypes = 8, containerEngine = "docker")
