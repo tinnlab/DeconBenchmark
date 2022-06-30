@@ -1,6 +1,6 @@
 # Deconvolution Benchmark
 
-This package provides a common interface to run 46 deconvolution methods.
+This package provides a common interface to run 45 deconvolution methods.
 
 ## Installation
 
@@ -144,4 +144,11 @@ print(head(proportions$ReFACTor))
 print(head(proportions$CIBERSORT))
 print(head(proportions$scaden))
 ```
+## Note on methods that require MATLAB
+`BayesCCE`, `Deblender`, and `DecOT` require a MATLAB license to run.
+Visit the Matlab license center at [https://www.mathworks.com/licensecenter/licenses](https://www.mathworks.com/licensecenter/licenses) to obtain a license file.
+The `hostid` of this license is the same as the `hostid` of the host machine.
+If `docker` is used, the user of this license must be `root`.
+If `singularity` is used, the user of this license is the same as the user of the host machine.
 
+To run these methods, pass `matlabLicenseFile=PATH_TO_YOUR_MATLAB_LICENSE` as an argument to `runDeconvolution`.

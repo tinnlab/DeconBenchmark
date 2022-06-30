@@ -19,7 +19,7 @@
 #' @param sigGenes A list of significant genes.
 #' @param signature A matrix of signature data. Rows are genes and columns are cell types. This matrix normally contains only marker genes (not to be confused with cell type expresison matrix).
 #' @param seed An integer value for the seed of the random number generator.
-#' @param matlabLicenseFile A path to a matlab license file. This file is required for methods that use matlab. The hostid of this license is the same as the hostid of the host machine. The user of this license must be `root`. Visit Matlab license center (https://www.mathworks.com/licensecenter/licenses) to obtain a license file.
+#' @param matlabLicenseFile A path to a matlab license file. This file is required for methods that use matlab. The hostid of this license is the same as the hostid of the host machine. The user of this license must be `root` if docker is used. Visit Matlab license center (https://www.mathworks.com/licensecenter/licenses) to obtain a license file.
 #' @param timeout A timeout in seconds for the docker container. The default value is 12 hours.
 #' @param containerEngine A string indicating the container engine, must be `docker` or `singularity`. The default value is `docker`.
 #' @param dockerArgs A list of extra arguments for the docker container. The default values allow docker container to use maximum 8 cpus, reserve 4GB of memory and allow it to use up to 32GB of memory.

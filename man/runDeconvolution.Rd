@@ -49,7 +49,7 @@ runDeconvolution(
 
 \item{seed}{An integer value for the seed of the random number generator.}
 
-\item{matlabLicenseFile}{A path to a matlab license file. This file is required for methods that use matlab. The hostid of this license is the same as the hostid of the host machine. The user of this license must be `root`. Visit Matlab license center (https://www.mathworks.com/licensecenter/licenses) to obtain a license file.}
+\item{matlabLicenseFile}{A path to a matlab license file. This file is required for methods that use matlab. The hostid of this license is the same as the hostid of the host machine. The user of this license must be `root` if docker is used. Visit Matlab license center (https://www.mathworks.com/licensecenter/licenses) to obtain a license file.}
 
 \item{timeout}{A timeout in seconds for the docker container. The default value is 12 hours.}
 
