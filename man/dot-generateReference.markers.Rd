@@ -6,6 +6,16 @@
 \usage{
 .generateReference.markers(singleCellExpr, singleCellLabels, log2Threshold = 1)
 }
+\arguments{
+\item{singleCellExpr}{A matrix of single cell expression data.}
+
+\item{singleCellLabels}{A vector of cell type labels.}
+
+\item{log2Threshold}{The log2 threshold for marker selection.}
+}
+\value{
+A list with names/keys are cell type labels and values are the corresponding markers.
+}
 \description{
 Calculate markers from single cell data. This method is not to be called by users.
 }

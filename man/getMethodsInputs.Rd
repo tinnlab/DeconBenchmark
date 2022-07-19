@@ -20,9 +20,9 @@ a list with names/keys are methods and values of each key are required parameter
 Get required inputs for a list of methods
 }
 \examples{
-\dontrun{
-requiredInputs <- getRequiredInputs(c("AdRoit", "ARIC"))
-print(requiredInputs$AdRoit)
-print(requiredInputs$ARIC)
-}
+
+requiredInputs <- getMethodsInputs(c("DeconRNASeq", "scaden"))
+print(requiredInputs$DeconRNASeq)
+print(requiredInputs$scaden)
+
 }

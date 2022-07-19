@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{.writeArgs}
 \alias{.writeArgs}
-\title{Write arguments to a h5 file}
+\title{Write inputs for deconvolution to a h5 file}
 \usage{
 .writeArgs(
   h5file,
@@ -19,6 +19,58 @@
   signature = NULL
 )
 }
+\arguments{
+\item{h5file}{A string of the h5 file path.}
+
+\item{bulk}{see `runDeconvolution` for details.}
+
+\item{nCellTypes}{see `runDeconvolution` for details.}
+
+\item{markers}{see `runDeconvolution` for details.}
+
+\item{isMethylation}{see `runDeconvolution` for details.}
+
+\item{seed}{see `runDeconvolution` for details.}
+
+\item{singleCellExpr}{see `runDeconvolution` for details.}
+
+\item{singleCellLabels}{see `runDeconvolution` for details.}
+
+\item{singleCellSubjects}{see `runDeconvolution` for details.}
+
+\item{cellTypeExpr}{see `runDeconvolution` for details.}
+
+\item{sigGenes}{see `runDeconvolution` for details.}
+
+\item{signature}{see `runDeconvolution` for details.}
+}
+\value{
+This function does not return any value.
+}
 \description{
-Write deconvolution arguments to a h5 file. This method is not to be called by users.
+Write deconvolution inputs to a h5 file.
+This method is not supposed to be called by users.
+}
+\details{
+This function writes deconvolution inputs to a single h5 file.
+Each input will be stored in a separate group with keys are:
+`inputName/values`, `inputName/names`, `inputName/rownames`, and `inputName/colnames`.
+The key `/values` will store the values of the inputs.
+The other keys will store the dimension names of the inputs.
+
+For example, when the input is `bulk`, a matrix, the group will be named `bulk` and the keys will be:
+`bulk/values`, `bulk/rownames`, and `bulk/colnames`.
+}
+\examples{
+
+library(DeconBenchmark)
+data(BloodExample) # Load example data
+print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
+
+.writeArgs("./inputs.h5",
+     bulk=BloodExample$bulk,
+     singleCellExpr=BloodExample$singleCellExpr,
+     singleCellLabels=BloodExample$singleCellLabels)
+
+unlink("./inputs.h5") # Remove the file for testing purposes
 }

@@ -1,9 +1,15 @@
 #' @title Calculate markers from single cell data
 #'
 #' @description Calculate markers from single cell data. This method is not to be called by users.
+#' @param singleCellExpr A matrix of single cell expression data.
+#' @param singleCellLabels A vector of cell type labels.
+#' @param log2Threshold The log2 threshold for marker selection.
+#'
+#' @return A list with names/keys are cell type labels and values are the corresponding markers.
 #'
 #' @importFrom edgeR DGEList calcNormFactors
 #' @importFrom limma voom lmFit contrasts.fit eBayes topTable
+#' @importFrom stats model.matrix
 .generateReference.markers <- function(singleCellExpr, singleCellLabels, log2Threshold = 1) {
   singleCellLabels <- as.character(singleCellLabels)
   colnames(singleCellExpr) <- singleCellLabels
@@ -91,7 +97,9 @@
 #' library(DeconBenchmark)
 #' data(BloodExample) # Load bulk data
 #' print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
-#' reference <- generateReference(BloodExample$singleCellExpr, BloodExample$singleCellLabels, c("markers", "sigGenes", "signature", "cellTypeExpr"))
+#' reference <- generateReference(BloodExample$singleCellExpr,
+#'                                BloodExample$singleCellLabels,
+#'                                c("markers", "sigGenes", "signature", "cellTypeExpr"))
 #' print(reference$markers)
 #' print(reference$sigGenes)
 #' print(head(reference$signature))

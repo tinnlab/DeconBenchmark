@@ -28,14 +28,18 @@
 #' @return A list with names/keys are methods and values of each key is the deconvolution result for the corresponding methods. The deconvolution result for each method is a list with two elements: `$P` and `$S`. The `$P` is a matrix cell type proportions (samples x cell type) and the `$S` is a matrix of cell type signatures (genes x cell type).
 #'
 #' @examples
-#' \dontrun{
+#'
 #' library(DeconBenchmark)
 #'
 #' allSupportMethods <- getSupportedMethods() # Get the list of supported methods
 #' print(allSupportMethods)
-#' methodsToRun <- c("ReFACTor", "scaden", "CIBERSORT") # Select methods to run (must be in the list of supported methods)
+#' # Select methods to run (must be in the list of supported methods)
+#' methodsToRun <- c("ReFACTor", "scaden", "DeconRNASeq")
 #' requiredInputs <- getMethodsInputs(methodsToRun) # Get the required inputs for each method
-#' print(requiredInputs) # list(ReFACTor = c("bulk", "nCellTypes"), scaden = c("bulk", "singleCellExpr", "singleCellLabels"), CIBERSORT = c("bulk", "signature"))
+#' print(requiredInputs)
+#' # list(ReFACTor    = c("bulk", "nCellTypes"),
+#' #      scaden      = c("bulk", "singleCellExpr", "singleCellLabels"),
+#' #      DeconRNASeq = c("bulk", "signature"))
 #'
 #' data(BloodExample) # Load example data
 #' print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
@@ -46,29 +50,42 @@
 #' proportion <- deconvolutionResult$ReFACTor$P
 #' print(head(proportion))
 #'
+#'
 #' # Run scaden only
 #' singleCellExpr <- BloodExample$singleCellExpr
 #' singleCellLabels <- BloodExample$singleCellLabels
-#'
-#' deconvolutionResult <- runDeconvolution(methods = "scaden", bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels)
+#' \dontrun{
+#' deconvolutionResult <- runDeconvolution(methods = "scaden",
+#'                                         bulk = bulk,
+#'                                         singleCellExpr = singleCellExpr,
+#'                                         singleCellLabels = singleCellLabels)
 #' proportion <- deconvolutionResult$scaden$P
 #' print(head(proportion))
+#' }
 #'
-#' # Run CIBERSORT only
-#' reference <- generateReference(singleCellExpr, singleCellLabels, type="signature") # Generate reference
+#' # Run DeconRNASeq only
+#' # Generate reference
+#' reference <- generateReference(singleCellExpr, singleCellLabels, type="signature")
 #'
-#' deconvolutionResult <- runDeconvolution(methods = "CIBERSORT", bulk = bulk, signature=reference$signature)
-#' proportion <- deconvolutionResult$CIBERSORT$P
+#' deconvolutionResult <- runDeconvolution(methods = "DeconRNASeq",
+#'                                         bulk = bulk, signature=reference$signature)
+#' proportion <- deconvolutionResult$DeconRNASeq$P
 #' print(head(proportion))
 #'
+#' \dontrun{
 #' # Run all three methods
-#' deconvolutionResults <- runDeconvolution(methodsToRun, bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels, signature=reference$signature)
+#' deconvolutionResults <- runDeconvolution(methodsToRun,
+#'                                          bulk = bulk,
+#'                                          singleCellExpr = singleCellExpr,
+#'                                          singleCellLabels = singleCellLabels,
+#'                                          signature=reference$signature)
 #' proportions <- lapply(deconvolutionResults, function(res) res$P)
 #'
 #' print(head(proportions$ReFACTor))
-#' print(head(proportions$CIBERSORT))
+#' print(head(proportions$DeconRNASeq))
 #' print(head(proportions$scaden))
 #' }
+#'
 #' @importFrom processx run
 #' @importFrom rhdf5 h5read
 #' @export

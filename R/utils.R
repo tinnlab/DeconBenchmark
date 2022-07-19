@@ -5,6 +5,7 @@
 #' @return an array of supported methods.
 #' @examples
 #' supportedMethods <- getSupportedMethods()
+#' print(supportedMethods)
 #' @export
 getSupportedMethods <- function(){
   c("AdRoit", "ARIC", "AutoGeneS", "BayCount", "BayesCCE", "BayICE", "BisqueMarker", "CellDistinguisher",
@@ -36,12 +37,13 @@ getSupportedMethods <- function(){
 #' @return a list with names/keys are methods and values of each key are required parameters of the coressponding method.
 #'
 #' @examples
-#' \dontrun{
-#' requiredInputs <- getRequiredInputs(c("AdRoit", "ARIC"))
-#' print(requiredInputs$AdRoit)
-#' print(requiredInputs$ARIC)
-#' }
+#'
+#' requiredInputs <- getMethodsInputs(c("DeconRNASeq", "scaden"))
+#' print(requiredInputs$DeconRNASeq)
+#' print(requiredInputs$scaden)
+#'
 #' @importFrom processx run
+#' @importFrom utils read.csv
 #' @export
 getMethodsInputs <- function(methods, containerEngine = "docker", verbose = T) {
   methodParams <- list()
@@ -112,10 +114,50 @@ getMethodsInputs <- function(methods, containerEngine = "docker", verbose = T) {
   methodParams
 }
 
-#' @title Write arguments to a h5 file
+#' @title Write inputs for deconvolution to a h5 file
 #'
-#' @description Write deconvolution arguments to a h5 file. This method is not to be called by users.
+#' @description Write deconvolution inputs to a h5 file.
+#' This method is not supposed to be called by users.
+#'
+#' @param h5file A string of the h5 file path.
+#' @param bulk see `runDeconvolution` for details.
+#' @param nCellTypes see `runDeconvolution` for details.
+#' @param markers see `runDeconvolution` for details.
+#' @param isMethylation see `runDeconvolution` for details.
+#' @param seed see `runDeconvolution` for details.
+#' @param singleCellExpr see `runDeconvolution` for details.
+#' @param singleCellLabels see `runDeconvolution` for details.
+#' @param singleCellSubjects see `runDeconvolution` for details.
+#' @param cellTypeExpr see `runDeconvolution` for details.
+#' @param sigGenes see `runDeconvolution` for details.
+#' @param signature see `runDeconvolution` for details.
+#'
+#' @details
+#' This function writes deconvolution inputs to a single h5 file.
+#' Each input will be stored in a separate group with keys are:
+#' `inputName/values`, `inputName/names`, `inputName/rownames`, and `inputName/colnames`.
+#' The key `/values` will store the values of the inputs.
+#' The other keys will store the dimension names of the inputs.
+#'
+#' For example, when the input is `bulk`, a matrix, the group will be named `bulk` and the keys will be:
+#' `bulk/values`, `bulk/rownames`, and `bulk/colnames`.
+#'
+#' @return This function does not return any value.
+#'
+#' @examples
+#'
+#' library(DeconBenchmark)
+#' data(BloodExample) # Load example data
+#' print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
+#'
+#' .writeArgs("./inputs.h5",
+#'      bulk=BloodExample$bulk,
+#'      singleCellExpr=BloodExample$singleCellExpr,
+#'      singleCellLabels=BloodExample$singleCellLabels)
+#'
+#' unlink("./inputs.h5") # Remove the file for testing purposes
 #' @importFrom rhdf5 h5createGroup h5write h5createFile
+#' @export
 .writeArgs <- function(h5file,
                        bulk,
                        nCellTypes = NULL,

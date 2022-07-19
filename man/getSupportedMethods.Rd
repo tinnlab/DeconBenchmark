@@ -14,4 +14,5 @@ Get supported deconvolution methods
 }
 \examples{
 supportedMethods <- getSupportedMethods()
+print(supportedMethods)
 }

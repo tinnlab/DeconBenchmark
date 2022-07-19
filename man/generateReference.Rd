@@ -34,7 +34,9 @@ Generate reference data from single-cell expression with cell type label for eac
 library(DeconBenchmark)
 data(BloodExample) # Load bulk data
 print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
-reference <- generateReference(BloodExample$singleCellExpr, BloodExample$singleCellLabels, c("markers", "sigGenes", "signature", "cellTypeExpr"))
+reference <- generateReference(BloodExample$singleCellExpr,
+                               BloodExample$singleCellLabels,
+                               c("markers", "sigGenes", "signature", "cellTypeExpr"))
 print(reference$markers)
 print(reference$sigGenes)
 print(head(reference$signature))

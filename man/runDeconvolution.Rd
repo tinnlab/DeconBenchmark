@@ -70,14 +70,18 @@ Each method has its own required inputs.
 See getMethodsInputs() for the input of each method.
 }
 \examples{
-\dontrun{
+
 library(DeconBenchmark)
 
 allSupportMethods <- getSupportedMethods() # Get the list of supported methods
 print(allSupportMethods)
-methodsToRun <- c("ReFACTor", "scaden", "CIBERSORT") # Select methods to run (must be in the list of supported methods)
+# Select methods to run (must be in the list of supported methods)
+methodsToRun <- c("ReFACTor", "scaden", "DeconRNASeq")
 requiredInputs <- getMethodsInputs(methodsToRun) # Get the required inputs for each method
-print(requiredInputs) # list(ReFACTor = c("bulk", "nCellTypes"), scaden = c("bulk", "singleCellExpr", "singleCellLabels"), CIBERSORT = c("bulk", "signature"))
+print(requiredInputs)
+# list(ReFACTor    = c("bulk", "nCellTypes"),
+#      scaden      = c("bulk", "singleCellExpr", "singleCellLabels"),
+#      DeconRNASeq = c("bulk", "signature"))
 
 data(BloodExample) # Load example data
 print(names(BloodExample)) # c("bulk", "singleCellExpr", "singleCellLabels")
@@ -88,27 +92,38 @@ deconvolutionResult <- runDeconvolution(methods = "ReFACTor", bulk = bulk, nCell
 proportion <- deconvolutionResult$ReFACTor$P
 print(head(proportion))
 
+
 # Run scaden only
 singleCellExpr <- BloodExample$singleCellExpr
 singleCellLabels <- BloodExample$singleCellLabels
-
-deconvolutionResult <- runDeconvolution(methods = "scaden", bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels)
+\dontrun{
+deconvolutionResult <- runDeconvolution(methods = "scaden",
+                                        bulk = bulk,
+                                        singleCellExpr = singleCellExpr,
+                                        singleCellLabels = singleCellLabels)
 proportion <- deconvolutionResult$scaden$P
 print(head(proportion))
+}
 
-# Run CIBERSORT only
+# Run DeconRNASeq only
 reference <- generateReference(singleCellExpr, singleCellLabels, type="signature") # Generate reference
 
-deconvolutionResult <- runDeconvolution(methods = "CIBERSORT", bulk = bulk, signature=reference$signature)
-proportion <- deconvolutionResult$CIBERSORT$P
+deconvolutionResult <- runDeconvolution(methods = "DeconRNASeq", bulk = bulk, signature=reference$signature)
+proportion <- deconvolutionResult$DeconRNASeq$P
 print(head(proportion))
 
+\dontrun{
 # Run all three methods
-deconvolutionResults <- runDeconvolution(methodsToRun, bulk = bulk, singleCellExpr = singleCellExpr, singleCellLabels = singleCellLabels, signature=reference$signature)
+deconvolutionResults <- runDeconvolution(methodsToRun,
+                                         bulk = bulk,
+                                         singleCellExpr = singleCellExpr,
+                                         singleCellLabels = singleCellLabels,
+                                         signature=reference$signature)
 proportions <- lapply(deconvolutionResults, function(res) res$P)
 
 print(head(proportions$ReFACTor))
-print(head(proportions$CIBERSORT))
+print(head(proportions$DeconRNASeq))
 print(head(proportions$scaden))
 }
+
 }

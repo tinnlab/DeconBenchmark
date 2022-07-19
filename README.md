@@ -50,7 +50,7 @@ List of supported methods, their required inputs beside bulk data and their orig
 | BayICE            | single cell expression, single cell labels                             | https://doi.org/10.1214/20-AOAS1376            | https://github.com/AshTai/BayICE/                    |
 | BisqueMarker      | markers                                                                | https://doi.org/10.1038/s41467-020-15816-6     | https://cran.r-project.org/package=BisqueRNA         |
 | CellDistinguisher | number of cell types                                                   | https://doi.org/10.1371/journal.pone.0193067   | https://github.com/GeneralElectric/CellDistinguisher |
-| CIBERSORT         | signature                                                              | https://doi.org/10.1038/s41587-019-0114-2      | https://cibersortx.stanford.edu/                     |
+| DeconRNASeq         | signature                                                              | https://doi.org/10.1038/s41587-019-0114-2      | https://DeconRNASeqx.stanford.edu/                     |
 | CPM               | single cell expression, single cell labels                             | https://doi.org/10.1038/s41592-019-0355-5      | https://cran.r-project.org/package=scBio             |
 | DAISM             | single cell expression, single cell labels                             | https://doi.org/10.1016/j.patter.2022.100440   | https://github.com/xmuyulab/DAISM-XMBD               |
 | debCAM            | number of cell types                                                   | https://doi.org/10.1093/bioinformatics/btaa205 | http://bioconductor.org/packages/debCAM              |
@@ -101,11 +101,11 @@ print(allSupportMethods)
 
 Select methods to run and get their required inputs.
 ```R
-methodsToRun <- c("ReFACTor", "scaden", "CIBERSORT") # Select methods to run (must be in the list of supported methods)
+methodsToRun <- c("ReFACTor", "scaden", "DeconRNASeq") # Select methods to run (must be in the list of supported methods)
 # Get the required inputs for each method. 
 # ContainerEngine is "docker" by default. Change containerEngine to "singularity" if you want to use singularity instead
 requiredInputs <- getMethodsInputs(methodsToRun, containerEngine = "docker")
-print(requiredInputs) # list(ReFACTor = c("bulk", "nCellTypes"), scaden = c("bulk", "singleCellExpr", "singleCellLabels"), CIBERSORT = c("bulk", "signature"))
+print(requiredInputs) # list(ReFACTor = c("bulk", "nCellTypes"), scaden = c("bulk", "singleCellExpr", "singleCellLabels"), DeconRNASeq = c("bulk", "signature"))
 ```
 Load example data
 ```R
@@ -128,11 +128,11 @@ deconvolutionResult <- runDeconvolution(methods = "scaden", bulk = bulk, singleC
 proportion <- deconvolutionResult$scaden$P
 print(head(proportion))
 
-# Run CIBERSORT only
+# Run DeconRNASeq only
 reference <- generateReference(singleCellExpr, singleCellLabels, type="signature") # Generate reference
 
-deconvolutionResult <- runDeconvolution(methods = "CIBERSORT", bulk = bulk, signature=reference$signature)
-proportion <- deconvolutionResult$CIBERSORT$P
+deconvolutionResult <- runDeconvolution(methods = "DeconRNASeq", bulk = bulk, signature=reference$signature)
+proportion <- deconvolutionResult$DeconRNASeq$P
 print(head(proportion))
 ```
 Run all three methods
@@ -141,7 +141,7 @@ deconvolutionResults <- runDeconvolution(methodsToRun, bulk = bulk, singleCellEx
 proportions <- lapply(deconvolutionResults, function(res) res$P)
 
 print(head(proportions$ReFACTor))
-print(head(proportions$CIBERSORT))
+print(head(proportions$DeconRNASeq))
 print(head(proportions$scaden))
 ```
 ## Note on methods that require MATLAB
