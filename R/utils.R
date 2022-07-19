@@ -38,9 +38,9 @@ getSupportedMethods <- function(){
 #'
 #' @examples
 #'
-#' requiredInputs <- getMethodsInputs(c("DeconRNASeq", "scaden"))
+#' requiredInputs <- getMethodsInputs(c("DeconRNASeq", "ReFACTor"))
 #' print(requiredInputs$DeconRNASeq)
-#' print(requiredInputs$scaden)
+#' print(requiredInputs$ReFACTor)
 #'
 #' @importFrom processx run
 #' @importFrom utils read.csv

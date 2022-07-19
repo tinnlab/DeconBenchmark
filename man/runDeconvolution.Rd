@@ -106,9 +106,11 @@ print(head(proportion))
 }
 
 # Run DeconRNASeq only
-reference <- generateReference(singleCellExpr, singleCellLabels, type="signature") # Generate reference
+# Generate reference
+reference <- generateReference(singleCellExpr, singleCellLabels, type="signature")
 
-deconvolutionResult <- runDeconvolution(methods = "DeconRNASeq", bulk = bulk, signature=reference$signature)
+deconvolutionResult <- runDeconvolution(methods = "DeconRNASeq",
+                                        bulk = bulk, signature=reference$signature)
 proportion <- deconvolutionResult$DeconRNASeq$P
 print(head(proportion))
 
