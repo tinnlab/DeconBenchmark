@@ -167,6 +167,7 @@ runDeconvolution <- function(methods,
       )
     } else if (containerEngine == "singularity"){
       params <- c("run",
+                  '--cleanenv',
                   '--env', paste0('INPUT_PATH=', tmpH5File),
                   '--env', paste0('OUTPUT_PATH=', file.path(tmpDir, paste0(method, "-results.h5")))
       )
